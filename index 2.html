@@ -1,1 +1,61 @@
-Users/hidemitogo/Downloads/osaka-senior-home-search%20(2).html
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大阪府 老人施設検索</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:#0f172a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#0f172a,#334155);color:#fff;padding:42px 18px 84px}
+.wrap{max-width:1120px;margin:auto}.badge{display:inline-block;background:rgba(255,255,255,.12);border-radius:999px;padding:7px 12px;font-size:14px}
+h1{font-size:clamp(30px,5vw,52px);margin:18px 0 10px}.lead{max-width:780px;line-height:1.8;color:rgba(255,255,255,.82)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:24px}.stat{background:rgba(255,255,255,.12);border-radius:20px;padding:16px}.stat span{display:block;color:rgba(255,255,255,.72);font-size:13px}.stat strong{font-size:30px}
+main{max-width:1120px;margin:-50px auto 0;padding:0 18px 42px}.panel{background:#fff;border-radius:26px;box-shadow:0 18px 45px rgba(15,23,42,.16);padding:18px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}input,select,textarea,button{font:inherit}input,select{min-height:46px;border:1px solid #e2e8f0;border-radius:16px;padding:0 14px;width:100%}
+button,.btn{min-height:42px;border:0;border-radius:999px;background:#0f172a;color:#fff;font-weight:700;padding:0 16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.chip{background:#f1f5f9;color:#475569;border-radius:999px;padding:8px 12px;font-size:14px}
+.import{display:none;margin-top:18px;background:#fff;border-radius:24px;padding:18px;box-shadow:0 8px 22px rgba(15,23,42,.08)}.import.open{display:block}
+textarea{width:100%;min-height:160px;border:1px solid #e2e8f0;border-radius:18px;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:28px}.card{background:#fff;border-radius:24px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,.07)}
+.cardtop{display:flex;justify-content:space-between;gap:12px}.source,.tag{display:inline-block;background:#f1f5f9;color:#475569;border-radius:999px;padding:5px 10px;font-size:12px}
+.card h2{font-size:18px;line-height:1.45}.meta{color:#475569;line-height:1.8;font-size:14px}.tags{display:flex;gap:8px;flex-wrap:wrap}.light{background:#f8fafc;color:#0f172a;border:1px solid #e2e8f0;border-radius:16px;min-height:42px;text-decoration:none;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.note,.empty{margin-top:28px;background:#fff;border-radius:24px;padding:18px;color:#475569;line-height:1.8}.empty{text-align:center;padding:34px}
+.modalback{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;place-items:center;padding:18px}.modalback.open{display:grid}.modal{background:#fff;border-radius:26px;padding:22px;width:min(620px,100%);box-shadow:0 24px 70px rgba(15,23,42,.35)}
+.info{background:#f8fafc;border-radius:16px;padding:14px;margin:10px 0}.info small{color:#64748b;display:block}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="badge">大阪府限定・電話・地図・料金欄つき</span><h1>大阪府 老人施設検索</h1><p class="lead">大阪府の老人施設を、施設名・地域・種別・電話・住所・料金情報で検索できます。CSVを取り込むと施設データを追加できます。</p><div class="stats"><div class="stat"><span>登録施設</span><strong id="total">0</strong></div><div class="stat"><span>表示中</span><strong id="shown">0</strong></div><div class="stat"><span>市区町村</span><strong id="cities">0</strong></div></div></div></header>
+<main>
+<section class="panel"><div class="controls"><input id="q" placeholder="施設名・住所・電話・料金で検索"><select id="city"></select><select id="type"></select><select id="area"></select></div><div class="row"><button id="reset">リセット</button><button id="importToggle" style="background:#0369a1">CSVを取り込む</button><a class="light" href="https://www.pref.osaka.lg.jp/o090100/jigyoshido/kaigo/data.html" target="_blank">大阪府公式CSVページ</a></div><div class="row" id="chips"></div></section>
+<section class="import" id="importBox"><h2>CSVを取り込む</h2><p class="meta">1行目に「事業所名称・サービス種類・所在地・電話番号・料金」などの見出しがあるCSVを貼り付けてください。</p><textarea id="csv" placeholder="ここにCSVを貼り付け"></textarea><div class="row"><button id="importBtn">取り込む</button><button id="sampleBtn" style="background:#64748b">サンプルに戻す</button></div><p id="msg" style="color:#0369a1;font-weight:700"></p></section>
+<section class="grid" id="results"></section><section class="empty" id="empty" hidden>条件に合う施設がありません。</section><section class="note"><b style="color:#0f172a">注意</b><br>料金・空室・医療対応は変わります。料金欄が不明な場合は「施設へ要確認」と表示しています。地図は住所と施設名からGoogleマップ検索を開きます。</section>
+</main>
+<div class="modalback" id="modalBack"><div class="modal" id="modal"><span class="source" id="mSource"></span><h2 id="mName"></h2><div class="info"><small>所在地</small><b id="mAddress"></b></div><div class="info"><small>電話番号</small><b id="mPhone"></b></div><div class="info"><small>料金</small><b id="mPrice"></b></div><div class="info"><small>施設種別</small><b id="mType"></b></div><div class="info"><small>エリア</small><b id="mArea"></b></div><div class="row" id="mActions"></div></div></div>
+<script>
+const sample=[
+{name:"フィレンツェライフ青山",type:"介護付有料老人ホーム",city:"藤井寺市",area:"南河内",address:"大阪府藤井寺市青山",phone:"要確認",price:"料金は施設へ要確認",source:"大阪府公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"そんぽの家 交野",type:"介護付有料老人ホーム",city:"交野市",area:"北河内",address:"大阪府交野市",phone:"要確認",price:"料金は施設へ要確認",source:"大阪府公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"ソルケア大東深野",type:"介護付有料老人ホーム",city:"大東市",area:"北河内",address:"大阪府大東市深野",phone:"要確認",price:"料金は施設へ要確認",source:"大阪府公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"スーパー・コート大東",type:"介護付有料老人ホーム",city:"大東市",area:"北河内",address:"大阪府大東市",phone:"要確認",price:"料金は施設へ要確認",source:"大阪府公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"ラポール摂津",type:"サービス付き高齢者向け住宅",city:"摂津市",area:"北摂",address:"大阪府摂津市",phone:"要確認",price:"月額・入居費は要確認",source:"大阪府公式一覧",features:["サ高住"]},
+{name:"そんぽの家豊中南曽根",type:"介護付有料老人ホーム",city:"豊中市",area:"北摂",address:"大阪府豊中市南曽根",phone:"要確認",price:"料金は施設へ要確認",source:"豊中市公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"SOMPOケア ラヴィーレ豊中",type:"介護付有料老人ホーム",city:"豊中市",area:"北摂",address:"大阪府豊中市",phone:"要確認",price:"料金は施設へ要確認",source:"豊中市公式一覧",features:["介護付","有料老人ホーム"]},
+{name:"フロイデンハイム",type:"有料老人ホーム",city:"堺市堺区",area:"堺市",address:"大阪府堺市堺区",phone:"要確認",price:"料金は施設へ要確認",source:"堺市公式一覧",features:["有料老人ホーム"]},
+{name:"介護付き住宅みのり堺",type:"介護付有料老人ホーム",city:"堺市中区",area:"堺市",address:"大阪府堺市中区",phone:"要確認",price:"料金は施設へ要確認",source:"堺市公式一覧",features:["介護付","有料老人ホーム"]}
+];
+let imported=[]; const elder=["介護老人福祉施設","特別養護老人ホーム","介護老人保健施設","介護医療院","認知症対応型共同生活介護","特定施設入居者生活介護","有料老人ホーム","サービス付き高齢者向け住宅","養護老人ホーム","軽費老人ホーム","ケアハウス"];
+const $=id=>document.getElementById(id), esc=s=>String(s||"").replace(/[&<>'"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[m])), uniq=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,"ja")), data=()=>imported.length?imported:sample;
+function mapUrl(f){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((f.address||"大阪府 "+f.city)+" "+f.name)}
+function split(line){let r=[],c="",q=false;for(let i=0;i<line.length;i++){let ch=line[i],n=line[i+1];if(ch=='"'&&q&&n=='"'){c+='"';i++;continue}if(ch=='"'){q=!q;continue}if(ch==","&&!q){r.push(c.trim());c="";continue}c+=ch}r.push(c.trim());return r}
+function pick(row,keys){for(const key of keys){if(row[key])return row[key];const f=Object.keys(row).find(k=>k.replaceAll(" ","").replaceAll("　","")==key.replaceAll(" ","").replaceAll("　",""));if(f&&row[f])return row[f]}return""}
+function cityFrom(address){let t=String(address||"").replace("大阪府","");let m=t.match(/^(大阪市.+?区|堺市.+?区|.+?市|.+?町|.+?村)/);return m?m[1]:"大阪府内"}
+function areaFrom(c){if(c.startsWith("大阪市"))return"大阪市";if(c.startsWith("堺市"))return"堺市";if(["豊中市","吹田市","池田市","箕面市","茨木市","高槻市","摂津市"].includes(c))return"北摂";if(["枚方市","寝屋川市","守口市","門真市","大東市","四條畷市","交野市"].includes(c))return"北河内";if(["東大阪市","八尾市","柏原市"].includes(c))return"中河内";if(["松原市","藤井寺市","羽曳野市","富田林市","河内長野市","大阪狭山市"].includes(c))return"南河内";return"大阪府内"}
+function parseCsv(text){let lines=text.replaceAll(String.fromCharCode(13),"").split(String.fromCharCode(10)).filter(x=>x.trim());if(lines.length<2)return[];let heads=split(lines[0]), out=[];for(const line of lines.slice(1)){let cells=split(line), row=Object.fromEntries(heads.map((h,i)=>[h.trim(),cells[i]||""]));let name=pick(row,["事業所名称","事業所名","施設名称","名称","事業所の名称"]), type=pick(row,["サービス種類名称","サービス種類","サービス名","サービス","施設種別","種別"]), address=pick(row,["事業所所在地","所在地","住所","事業所の所在地"]), phone=pick(row,["電話番号","TEL","連絡先","事業所電話番号"]), price=pick(row,["料金","月額","月額費用","入居費用","利用料","家賃"]);if(!name||!type)continue;if(!elder.some(w=>(name+" "+type).includes(w)))continue;let city=cityFrom(address);out.push({name,type,city,area:areaFrom(city),address:address||"大阪府 "+city,phone:phone||"要確認",price:price||"料金は施設へ要確認",source:"取込CSV",features:elder.filter(w=>(name+" "+type).includes(w)).slice(0,3)})}let seen=new Set();return out.filter(x=>{let k=x.name+x.type+x.address;if(seen.has(k))return false;seen.add(k);return true})}
+function fill(sel, vals, label){let old=sel.value;sel.innerHTML='<option value="すべて">'+label+'</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join(""); if([...sel.options].some(o=>o.value==old)) sel.value=old}
+function render(){let d=data();fill($("city"),uniq(d.map(f=>f.city)),"すべての市区町村");fill($("type"),uniq(d.map(f=>f.type)),"すべての種別");fill($("area"),uniq(d.map(f=>f.area)),"すべてのエリア");let q=$("q").value.trim().toLowerCase(), city=$("city").value, type=$("type").value, area=$("area").value;let list=d.filter(f=>{let text=[f.name,f.type,f.city,f.area,f.address,f.phone,f.price,...(f.features||[])].join(" ").toLowerCase();return(!q||text.includes(q))&&(city=="すべて"||f.city==city)&&(type=="すべて"||f.type==type)&&(area=="すべて"||f.area==area)});$("total").textContent=d.length;$("shown").textContent=list.length;$("cities").textContent=uniq(d.map(f=>f.city)).length;$("chips").innerHTML='<span class="chip">'+list.length+'件表示中</span><span class="chip">'+(imported.length?"CSV取込済み":"サンプル表示中")+'</span>';$("empty").hidden=list.length!==0;$("results").innerHTML=list.map((f,i)=>'<article class="card"><div class="cardtop"><span class="source">'+esc(f.source)+'</span></div><h2>'+esc(f.name)+'</h2><p class="meta">所在地：'+esc(f.address)+'<br>電話：'+esc(f.phone)+'<br>料金：'+esc(f.price)+'<br>種別：'+esc(f.type)+'</p><div class="tags">'+(f.features||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join("")+'</div><div class="row"><button class="btn" data-detail="'+i+'" style="flex:1">詳細</button>'+(f.phone&&f.phone!="要確認"?'<a class="light" href="tel:'+esc(f.phone)+'">電話</a>':"")+'<a class="light" href="'+mapUrl(f)+'" target="_blank">地図</a></div></article>').join("");document.querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openModal(list[Number(b.dataset.detail)]))}
+function openModal(f){$("mSource").textContent=f.source;$("mName").textContent=f.name;$("mAddress").textContent=f.address;$("mPhone").textContent=f.phone;$("mPrice").textContent=f.price;$("mType").textContent=f.type;$("mArea").textContent=f.area;$("mActions").innerHTML=(f.phone&&f.phone!="要確認"?'<a class="light" style="flex:1" href="tel:'+esc(f.phone)+'">電話する</a>':"")+'<a class="light" style="flex:1" href="'+mapUrl(f)+'" target="_blank">地図を見る</a><button id="close">閉じる</button>';$("modalBack").classList.add("open");$("close").onclick=()=>$("modalBack").classList.remove("open")}
+["q","city","type","area"].forEach(id=>$(id).addEventListener(id=="q"?"input":"change",render));$("reset").onclick=()=>{$("q").value="";$("city").value="すべて";$("type").value="すべて";$("area").value="すべて";render()};$("importToggle").onclick=()=>$("importBox").classList.toggle("open");$("importBtn").onclick=()=>{let rows=parseCsv($("csv").value);if(!rows.length){$("msg").textContent="取り込めませんでした。CSVの見出しを確認してください。";return}imported=rows;$("msg").textContent=rows.length+"件を取り込みました。";render()};$("sampleBtn").onclick=()=>{imported=[];$("csv").value="";$("msg").textContent="サンプルに戻しました。";render()};$("modalBack").onclick=()=>$("modalBack").classList.remove("open");$("modal").onclick=e=>e.stopPropagation();render();
+</script>
+</body>
+</html>
